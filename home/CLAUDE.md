@@ -64,6 +64,8 @@ time they matter. Charlie reads derivations and audits numbers, not code.
 
 ## Git
 
-- Commit only when asked. Never push to a remote Charlie does not own without being asked.
+- Commit only when asked. Push only to remotes in Charlie's personal GitHub account
+  (`charlieledley`) unless Charlie says otherwise for that push; never to an organisation or
+  colleague's remote on a standing instruction. (Charlie, 2026-10-09.)
 - Before discarding or overwriting, look at what is there. Office metadata churn on `.xlsx`
   files is not unsaved work.
