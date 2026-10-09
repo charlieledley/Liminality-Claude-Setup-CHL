@@ -1,0 +1,51 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/after-compaction-reminder.sh\"",
+            "timeout": 10,
+            "statusMessage": "Post-compaction reminder"
+          }
+        ]
+      }
+    ]
+  },
+  "agentPushNotifEnabled": true,
+  "autoMode": {
+    "environment": [
+      "### Org-wide",
+      "**Organization**: Liminality Capital (origin remote: LiminalityCapital/Liminality-put-writing-strategy)",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: unverified — gh visibility check was not queryable here; treat as possibly public: scope commits/pushes to this repo as for a public repo until confirmed otherwise",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: .env-based (strategy_dashboard/.env, gitignored; strategy_dashboard/.env.example tracked as template); secrets.yaml also gitignored",
+      "**Default / protected branches**: main (default, per CLAUDE.md — work on feature branches, origin is shared upstream); protected-branch status not queryable via gh here",
+      "**CI/CD deploy targets**: None configured — repo docs note no CI; a local pre-commit hook (.githooks/pre-commit) runs test pins, not a deploy pipeline",
+      "**Network posture**: None configured",
+      "**Host containment**: None configured — assume ordinary developer machine with open internet",
+      "**Source control**: This repo (C:\\Liminality-put-writing-strategy) and its three remotes only: origin (LiminalityCapital/Liminality-put-writing-strategy), mine (charlieledley/liminality-putwrite-charlie-sandbox), dashboard-v2 (FrancescoMarzorati/Dashboard-V2) — no additional orgs configured",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: blpapi.bloomberg.com (Bloomberg Desktop/terminal API, contacted in-session); internal PostgreSQL database referenced in README for Bloomberg vol-surface and swaption data (host/connection details not gathered)",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: strategy_dashboard/.env and any secrets.yaml (credentials); investor-facing deck and Scorecard outputs (docs/, exports/) are business-sensitive and distinguish internal-only commentary (internal_note() blocks, INTERNAL_NOTES=False for external build) from investor-facing content — share only with audiences cleared for investor materials",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace/host/container with 'prod' or 'production' as a whole word/segment — none specifically identified in this repo beyond the general default",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything tagged prod/production as a whole word or segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: quantitative research and backtesting for an options-writing/hedged-equity investment strategy (software development in service of finance research)",
+      "**Trusted repo**: C:\\Liminality-put-writing-strategy and its three configured remotes (origin, mine, dashboard-v2); visibility unverified so treat as possibly public — only this repo's own work belongs in it, and secrets/sensitive data are never cleared into it regardless of visibility",
+      "**Org-specific CLIs**: None configured",
+      "Routine under analysis/, docs/decisions/, exports/ (gitignored workbook outputs), and ~/.claude/skills/ (xlsx-report, bbg-pull) prefixes — treated as routine per repo CLAUDE.md conventions"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(git push:origin *)"
+    ]
+  }
+}

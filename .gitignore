@@ -1,0 +1,18 @@
+# ── Python ──
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ── Secrets / credentials (never belong in a setup repo) ──
+.env
+*.pem
+secrets.yaml
+*.token
+*.key
+
+# ── OS / editor / tooling (per machine) ──
+.DS_Store
+.claude/
+.obsidian/
+.trash/

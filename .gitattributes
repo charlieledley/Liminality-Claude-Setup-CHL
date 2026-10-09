@@ -1,0 +1,6 @@
+# Normalise line endings on commit; shell hooks must stay LF or sh cannot read the shebang
+* text=auto
+*.sh text eol=lf
+home/hooks/* text eol=lf
+*.pdf binary
+*.xlsx binary
