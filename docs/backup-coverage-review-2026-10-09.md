@@ -18,6 +18,10 @@ lose, and what covers it. Written after Charlie asked what else might not be cov
 
 ## Gaps found
 
+Gaps 1 and 2 were closed later the same day: every put-writing branch was pushed to `mine`,
+and swap-spreads got a personal-account `origin` and was pushed. The organisation remote for
+put-writing is still unexplained. The rest stand.
+
 1. **The GitHub copy of put-writing is stale, and its shared remote is gone.** The remote
    `origin` (the LiminalityCapital organisation repo) answers "repository not found" on
    2026-10-09: deleted, renamed, or the stored login no longer has access. The personal remote
@@ -60,8 +64,8 @@ lose, and what covers it. Written after Charlie asked what else might not be cov
 
 ## Suggested order of fixes
 
-1. Push put-writing to `mine` now, and sort out what happened to `origin`.
-2. Create the GitHub repos for swap-spreads and this repo (Charlie, in the browser).
+1. ~~Push put-writing to `mine`~~ done 2026-10-09; still to sort out what happened to `origin`.
+2. ~~Create the GitHub repos for swap-spreads and this repo~~ done 2026-10-09.
 3. Ask whoever runs the PostgreSQL server how it is backed up, and consider a periodic dump
    of the saved-strategies table into the put-writing repo.
 4. Add a monthly dated snapshot alongside each `-current` folder, or confirm OneDrive version

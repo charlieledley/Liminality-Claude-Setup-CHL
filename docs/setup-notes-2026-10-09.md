@@ -71,14 +71,15 @@ touches it.
 
 ## Repositories on this PC
 
-All three sit at the root of `C:\`, each with a `tools/backup-to-onedrive.ps1` and a
+Standing rule from 2026-10-09: push only to Charlie's personal GitHub account unless told
+otherwise for that push. All three sit at the root of `C:\`, each with a `tools/backup-to-onedrive.ps1` and a
 `docs/decisions/` log.
 
 | Repo | GitHub |
 |---|---|
-| `Liminality-put-writing-strategy` | `origin` in the LiminalityCapital organisation, `mine` in Charlie's account, `dashboard-v2` a collaborator's fork |
-| `Liminality-french-swap-spreads` | none as of 2026-10-09 |
-| `Liminality-Claude-Setup-CHL` | pending, see decision 0002 |
+| `Liminality-put-writing-strategy` | `mine` in Charlie's account holds every branch (pushed 2026-10-09); `origin` in the LiminalityCapital organisation answered "not found" that day; `dashboard-v2` is a collaborator's fork |
+| `Liminality-french-swap-spreads` | `origin` in Charlie's account, added and pushed 2026-10-09 |
+| `Liminality-Claude-Setup-CHL` | `origin` in Charlie's account, pushed 2026-10-09 |
 
 ## Phone and other devices
 
