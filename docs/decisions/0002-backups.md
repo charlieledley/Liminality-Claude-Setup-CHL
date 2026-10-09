@@ -1,7 +1,8 @@
 # 0002 · Backups: GitHub remote plus hourly OneDrive copy
 
-**Status:** OneDrive half done 2026-10-09 (Claude, at Charlie's request). GitHub half waiting
-on Charlie creating the repository; owner to be recorded here once chosen.
+**Status:** done 2026-10-09. OneDrive job registered; GitHub remote `origin` added and pushed
+the same day. Owner: Charlie's personal GitHub account, private, repo name as created with a
+stray hyphen ("Liminalit-y"), GitHub redirects the old name if it is renamed.
 
 ## Decision
 
@@ -12,10 +13,10 @@ Two independent backups, matching the put-writing repo and the swap-spreads OneD
   OneDrive" runs it hourly as the logged-in user, start-when-available, one instance at a time,
   30-minute limit. Destination is `Liminality-Claude-Setup-CHL-backup-current\` in the company
   OneDrive, with `project\` and `claude-sessions\` beneath it. Copy-only, never deletes.
-- **GitHub.** Remote `origin`, private. Owner: _to be filled in_ (recommended: the
-  LiminalityCapital organisation, where the put-writing repo's `origin` lives, so that a
-  colleague's setup repo can sit beside it; the alternative is Charlie's personal account).
-  Push on request only.
+- **GitHub.** Remote `origin`, private, in Charlie's personal account (chosen 2026-10-09 over
+  the LiminalityCapital organisation; the organisation's put-writing repo was found
+  unreachable the same day, see `docs/backup-coverage-review-2026-10-09.md`). Push on
+  request only.
 
 ## What was deliberately left out
 
