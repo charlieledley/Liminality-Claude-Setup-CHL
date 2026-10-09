@@ -15,7 +15,19 @@ under `home/`.
 | `home/skills/` | personal skills: `bbg-pull`, `checkpoint`, `xlsx-report` | yes |
 | `home/hooks/` | shell hooks referenced from `settings.json` | yes |
 | `tools/sync_setup.py` | copies between `~/.claude` and `home/` | yes |
+| `tools/backup-to-onedrive.ps1` | hourly copy of the repo to company OneDrive | yes |
 | `docs/decisions/` | numbered decision log | yes |
+
+## Backups
+
+Two, independent of each other, the same arrangement as the other Liminality repos:
+
+1. **GitHub**, remote `origin`: the commit history, pushed when asked.
+2. **OneDrive**: a Windows scheduled task runs `tools/backup-to-onedrive.ps1` every hour and
+   copies the working folder and this repo's Claude session folder into
+   `OneDrive - Liminality Capital LP\Liminality-Claude-Setup-CHL-backup-current\`. It only
+   ever adds and overwrites, so a file deleted here stays in the backup. Each run appends a
+   line to `backup.log` in that folder; open it to see when the job last ran.
 
 Project-level `CLAUDE.md` files stay in their own repos. Memory folders, session transcripts
 and caches are not part of the setup and are not tracked.

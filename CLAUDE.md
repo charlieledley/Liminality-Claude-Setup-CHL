@@ -19,4 +19,17 @@ commands. Decisions go in `docs/decisions/`.
   the commit message which skill changed and why. Other sessions on other repos pick the
   change up only through `~/.claude`.
 - Never commit secrets. `settings.json` is tracked; read its diff before staging it.
-- Commit only when asked. No remote until Charlie names one.
+- Commit only when asked.
+
+## Git and backups
+
+- `main` is the integration branch. Several Claude sessions may share this working tree:
+  before `git add`, run `git status` and stage only the files you changed, by path.
+- Remote `origin` is the GitHub backup (see `docs/decisions/0002-backups.md` for which
+  account owns it). **Never push without being asked.**
+- Backup: `tools/backup-to-onedrive.ps1` runs hourly from the Windows scheduled task
+  "Liminality Claude-Setup-CHL backup to OneDrive" and copies the repo (minus `.venv` and
+  caches) and this project's Claude transcript and memory folder into
+  `OneDrive - Liminality Capital LP\Liminality-Claude-Setup-CHL-backup-current\`. Copy-only,
+  never deletes. Log is `backup.log` in that folder. Set up 2026-10-09, mirroring the
+  put-writing and swap-spreads jobs.
