@@ -1,8 +1,8 @@
 # 0002 · Backups: GitHub remote plus hourly OneDrive copy
 
 **Status:** done 2026-10-09. OneDrive job registered; GitHub remote `origin` added and pushed
-the same day. Owner: Charlie's personal GitHub account, private, repo name as created with a
-stray hyphen ("Liminalit-y"), GitHub redirects the old name if it is renamed.
+the same day. Owner: Charlie's personal GitHub account, private, repo name corrected to
+`Liminality-Claude-Setup-CHL` after a first push under a mistyped name.
 
 ## Decision
 
