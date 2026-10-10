@@ -12,6 +12,65 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$HOME/.claude/hooks/guard-bash.py\"",
+            "timeout": 20,
+            "statusMessage": "Checking the command against the working rules"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$HOME/.claude/hooks/check-python-syntax.py\"",
+            "timeout": 20,
+            "statusMessage": "Syntax check"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$HOME/.claude/skills/obsidian-sync/sync_claude_to_obsidian.py\" --quiet",
+            "timeout": 55,
+            "statusMessage": "Syncing sessions into Obsidian"
+          }
+        ]
+      }
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status *)",
+      "Bash(git log *)",
+      "Bash(git diff *)",
+      "Bash(git show *)",
+      "Bash(git branch *)",
+      "Bash(git remote -v *)",
+      "Bash(git ls-files *)",
+      "Bash(git rev-parse *)",
+      "Bash(.venv/Scripts/python.exe -m pytest *)",
+      "Bash(python -m pytest *)",
+      "PowerShell(git status *)",
+      "PowerShell(git log *)",
+      "PowerShell(git diff *)",
+      "PowerShell(.venv\\Scripts\\python.exe -m pytest *)"
     ]
   },
   "agentPushNotifEnabled": true,

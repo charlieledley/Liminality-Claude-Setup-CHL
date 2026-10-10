@@ -46,6 +46,36 @@ time they matter. Charlie reads derivations and audits numbers, not code.
 - Excel workbooks are the default deliverable for tables and comparisons, built with the
   `xlsx-report` skill. Target `.xlsx`, never `.xls`. Write them to a gitignored folder.
 
+## Working with agents
+
+Added 2026-10-10 from the agent orchestration guide (`~/.claude/docs/`), adapted to research
+repos. The rules above win where they overlap.
+
+- The lead session keeps decisions and coordination; subagents do exploration and execution.
+  Delegate research to `researcher` agents, one per independent question, launched together.
+  Keep their evidence, not their file dumps, in the main context.
+- For anything that changes a quoted figure, a method, a convention, the dashboard or an
+  investor deliverable: explore, plan, implement, verify, independent review, in that order,
+  with different agents for building and judging. The `implement-change`, `fix-bug` and
+  `adversarial-review` skills run this. A one-file edit that moves no figure is just done.
+- Ask Charlie only the questions that change the method or a number (window, anchor, record
+  end, convention, cost or fee basis, benchmark, data gap), in one batch. Find the rest in
+  the repo. Never decide one of those silently.
+- Implementation agents get non-overlapping file ownership; sessions share one working tree.
+  Worktrees are for isolated branch work only: they lack `.venv`, caches and `.env`.
+- Agent teams (several sessions coordinating) only when the work has substantial independent
+  parts and the agents must talk to each other. Not for a rename.
+- Definition of done: the requested scope and nothing beyond it; targeted tests and the
+  named pin run with the project Python and reported with their output; every figure stated
+  with its construction; the diff inspected and containing only your files; nothing staged
+  or committed unless asked; an independent review for anything in the list above; the
+  deliverable sent as a file card; the `checkpoint` skill run. If something could not be
+  verified, say so in the body of the report.
+- Hooks enforce, whatever the prompt says: pushes only to Charlie's personal GitHub, no force
+  push, no `--no-verify`, no whole-tree discards, no recursive deletes outside scratch, no
+  installs into a project `.venv`, a syntax check after every Python edit, and an Obsidian
+  sync when a session ends. A blocked command is a question for Charlie, not a workaround.
+
 ## Sessions
 
 - Several Claude Code sessions run on the same repo at once. When Charlie says "we already

@@ -6,7 +6,8 @@ Usage (from the repo folder, any shell):
     python tools/sync_setup.py to-repo    # copy ~/.claude  ->  home/   (after editing a skill in place)
     python tools/sync_setup.py to-home    # copy home/      ->  ~/.claude (on a new machine, or after git pull)
 
-Only the files Claude Code reads are synced: CLAUDE.md, settings.json, skills/, hooks/.
+Only the files Claude Code reads are synced: CLAUDE.md, settings.json, skills/, hooks/,
+agents/ (subagent definitions) and docs/ (reference documents such as the orchestration guide).
 Caches (__pycache__, *.pyc) are skipped. `to-repo` mirrors exactly, so a skill deleted
 from ~/.claude is deleted from home/ too (git keeps the history). `to-home` only adds
 and overwrites; it never deletes anything in ~/.claude.
@@ -20,7 +21,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent / "home"
 HOME = Path.home() / ".claude"
-ITEMS = ["CLAUDE.md", "settings.json", "skills", "hooks"]
+ITEMS = ["CLAUDE.md", "settings.json", "skills", "hooks", "agents", "docs"]
 SKIP_DIRS = {"__pycache__", ".git"}
 SKIP_SUFFIXES = {".pyc", ".pyo"}
 
