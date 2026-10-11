@@ -16,11 +16,15 @@ the conversation if one was run; if none is visible, review the whole visible co
 and say so in the report. Anything already lost to an earlier compaction cannot be recovered
 here; do not guess at it.
 
-## The five questions
+## The seven questions
 
 Go through each one against the session. Be selective. The memory folder already has thirty
 entries; a checkpoint that adds five more every time makes the index useless.
 
+0. **Claims.** Did the analysis reach a research conclusion (a figure, a comparison, a test
+   outcome), or overturn one? Record it in the repo's claim store with the `claims` skill;
+   an overturned one is superseded with its reason, never corrected. Check that nothing
+   quoted this session rests on a claim that is no longer live.
 1. **Decisions.** Did anything change a number, a method or a convention? A window, an anchor
    date, a cost assumption, a benchmark, a fallback, a naming choice. Did Charlie approve or
    reject an approach? These go in the repo's decision log if it has one (`docs/decisions/`).
@@ -36,12 +40,23 @@ entries; a checkpoint that adds five more every time makes the index useless.
    repo. A rule is for something that has actually bitten, not something that might.
 5. **Tests.** Was a figure quoted that will be quoted again, and does any test pin it? Was a
    bug fixed that a test would catch if it came back?
+6. **Uncommitted work.** Run `git status --short` in the repo. List every modified or untracked
+   file with its age, leaving out Office metadata churn on workbooks. Work a session leaves
+   uncommitted is invisible to git and GitHub until someone notices: on 2026-09-27 a parallel
+   session's variance-calendar scripts, two decision files and seventeen result files were left
+   "for it to commit", and nothing committed them for twelve days. Do not commit here (Charlie's
+   rule is commit only when asked); put the list in the report and ask, naming which files are
+   this session's and which look like another session's.
 
 ## What to write now
 
-Decisions and memories are written immediately. They are files on disk that Charlie can read,
-and both live somewhere visible (the repo, or the memory folder with its index), so a bad one
-is easy to spot and delete.
+Claims, decisions and memories are written immediately. They are files on disk that Charlie
+can read, and all live somewhere visible (the repo, or the memory folder with its index), so
+a bad one is easy to spot; a claim is never deleted, only superseded.
+
+**Claim.** `python ~/.claude/skills/claims/claims.py add "<conclusion with figure, window,
+script>" --tag <topic>` from the repo folder; `--supersedes <id> --reason "..."` when it
+overturns an earlier one. The `claims` skill has the details.
 
 **Decision file.** `docs/decisions/NNNN-<what-it-decides>.md`, next number in sequence, status
 line with the date and who decided (Charlie, or "proposed (Claude); Charlie to confirm").
@@ -80,6 +95,8 @@ Plain register. Three short sections, each a list or the word "none":
 - **Proposed**: rules, skills, tests awaiting a yes.
 - **Considered and skipped**: things that came up but did not clear the bar, with the reason
   in a few words. This is what lets Charlie catch a wrong call.
+- **Uncommitted**: the files `git status` shows modified or untracked, with ages and whose they
+  look to be, or the word "none". Ask whether to commit.
 
 Then one line: what the scope was (since which checkpoint, or the whole visible session).
 
