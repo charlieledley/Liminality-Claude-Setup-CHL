@@ -45,6 +45,14 @@ time they matter. Charlie reads derivations and audits numbers, not code.
   first before building a formatter from scratch.
 - Excel workbooks are the default deliverable for tables and comparisons, built with the
   `xlsx-report` skill. Target `.xlsx`, never `.xls`. Write them to a gitignored folder.
+- Research conclusions go in the repo's claim store (`docs/claims.jsonl`, through the `claims`
+  skill). When a conclusion is reached, record it with `claims.py add`, with the figure and its
+  construction. When one is overturned, add the new conclusion with `--supersedes <id>
+  --reason "..."`. Never edit or delete an entry. Before citing an earlier conclusion, check
+  it is still live (`claims.py list`). Decisions and conventions still go in `docs/decisions/`;
+  a claim that becomes one names its decision file. (Added 2026-10-10 from the temporal-memory
+  note in `~/.claude/docs/`.)
+- Prefer taking the idea without the dependency when the cost is disproportionate.
 
 ## Working with agents
 

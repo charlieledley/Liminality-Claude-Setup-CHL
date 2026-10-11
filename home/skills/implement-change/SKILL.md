@@ -77,4 +77,5 @@ Return to Charlie, plain register:
 5. what remains uncertain or unverified;
 6. the deliverable as a file card (workbook attached, slide rendered).
 
-Then run the `checkpoint` skill. Commit only if Charlie asked.
+Record each conclusion the work reached in the claim store (`claims` skill), superseding any
+it overturned with the reason. Then run the `checkpoint` skill. Commit only if Charlie asked.

@@ -549,6 +549,25 @@ def copy_docs(vault: Path) -> list[tuple[str, str]]:
     return out
 
 
+def export_claims(vault: Path, cwds: set[str]) -> list[tuple[str, str]]:
+    """Render every claim store (per repo docs/claims.jsonl, plus the general one) via the claims skill.
+    Returns (project name, note name)."""
+    sys.path.insert(0, str(CLAUDE_HOME / "skills" / "claims"))
+    try:
+        import claims  # noqa: WPS433
+    except ImportError:
+        return []
+    stores = [Path(c) / "docs" / "claims.jsonl" for c in sorted(cwds) if c and "scratch-workspaces" not in c]
+    stores.append(CLAUDE_HOME / "claims.jsonl")
+    out = []
+    for st in stores:
+        if st.exists():
+            target = claims.export_md(st, vault)
+            out.append((claims.store_name(st), target.stem))
+            log(f"  claims   {target.name}")
+    return out
+
+
 def repo_docs(cwd: str) -> list[tuple[str, str]]:
     """Markdown/HTML/PDF documents inside a project folder worth linking (docs/, README, CLAUDE.md)."""
     if not cwd or "scratch-workspaces" in cwd:
@@ -568,7 +587,8 @@ def repo_docs(cwd: str) -> list[tuple[str, str]]:
     return out[:300]
 
 
-def write_project_notes(vault: Path, sessions: list[dict], memory: dict[str, list[str]]) -> list[str]:
+def write_project_notes(vault: Path, sessions: list[dict], memory: dict[str, list[str]], claims: list[tuple[str, str]] = ()) -> list[str]:
+    claim_notes = dict(claims)
     by_proj: dict[str, list[dict]] = defaultdict(list)
     for s in sessions:
         by_proj[s["project"]].append(s)
@@ -598,6 +618,8 @@ def write_project_notes(vault: Path, sessions: list[dict], memory: dict[str, lis
                 cost = f"{s['cost']:.2f}" if s["cost"] else ""
                 lines.append(f"| {s['date']} | [[{s['note']}]] | {s['prompts']} | {s['tool_calls']} | {cost} | {flag} |")
             lines.append(f"\nCost column is the app's own running total per transcript (blank where the app recorded none), summed here to {total_cost:.2f}; it is a usage figure, not an audited one.")
+        if proj in claim_notes:
+            lines += ["", "## Claims", "", f"Research conclusions and the line of reasoning behind them: [[{claim_notes[proj]}]]."]
         if proj in memory:
             lines += ["", "## Memory", "", "Facts, feedback and decisions Claude keeps between sessions for this project (copies; the originals are in the Claude memory folder).", ""]
             for rel in sorted(memory[proj]):
@@ -632,7 +654,7 @@ def write_project_notes(vault: Path, sessions: list[dict], memory: dict[str, lis
 
 
 def write_hub(vault: Path, sessions: list[dict], projects: list[str], memory: dict[str, list[str]], skills: list[str],
-              agents: list[str] = (), docs: list[tuple[str, str]] = ()) -> None:
+              agents: list[str] = (), docs: list[tuple[str, str]] = (), claims: list[tuple[str, str]] = ()) -> None:
     now = fmt_dt(dt.datetime.now().astimezone())
     cc = [s for s in sessions if s["kind"] == "claude-code"]
     cw = [s for s in sessions if s["kind"] == "cowork"]
@@ -655,6 +677,12 @@ def write_hub(vault: Path, sessions: list[dict], projects: list[str], memory: di
         lines.append(f"Imported conversations: [[Claude Chat]].")
     else:
         lines.append("Not imported yet. Web and mobile chats are not stored on this PC. Request the export in claude.ai under Settings → Privacy → Export data, then run the importer on the emailed zip (see [[How this folder is kept in sync]]).")
+    lines += ["", "## Claims", "", "Research conclusions with their supersession chains (the `claims` skill)."]
+    if claims:
+        for p, note in claims:
+            lines.append(f"- [[{note}|{p}]]")
+    else:
+        lines.append("No claim store yet. One appears at `docs/claims.jsonl` in a repo the first time a conclusion is recorded.")
     lines += ["", "## Memory", "", "What Claude carries between sessions, per project.", ""]
     for p, files in sorted(memory.items()):
         idx = [f for f in files if Path(f).name == "MEMORY.md"]
@@ -805,10 +833,11 @@ def main() -> None:
     skills = copy_skills(vault)
     agents = copy_agents(vault)
     docs = copy_docs(vault)
-    projects = write_project_notes(vault, sessions, memory)
+    claims = export_claims(vault, {s["cwd"] for s in sessions})
+    projects = write_project_notes(vault, sessions, memory, claims)
     write_timeline(vault, sessions)
     write_howto(vault)
-    write_hub(vault, sessions, projects, memory, skills, agents, docs)
+    write_hub(vault, sessions, projects, memory, skills, agents, docs, claims)
 
     state_path.parent.mkdir(parents=True, exist_ok=True)
     state_path.write_text(json.dumps(state, indent=1), encoding="utf-8")

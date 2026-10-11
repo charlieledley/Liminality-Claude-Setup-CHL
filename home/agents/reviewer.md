@@ -30,7 +30,9 @@ it, the relevant decision files and the tests.
   scratchpad instead of the repo or `exports/`;
 - git hygiene: files from another session included in the change; anything staged or
   committed when it was not asked for;
-- missing or weakened tests, a pin updated without the decision that justifies it.
+- missing or weakened tests, a pin updated without the decision that justifies it;
+- a conclusion cited as current that the repo's claim store (`docs/claims.jsonl`, `claims`
+  skill) shows as superseded, or a claim store entry edited or removed rather than superseded.
 
 ## Classify
 

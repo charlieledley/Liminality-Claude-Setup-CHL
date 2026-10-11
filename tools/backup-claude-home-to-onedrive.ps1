@@ -16,9 +16,17 @@
   COPY-ONLY, NEVER DELETE. No /MIR or /PURGE, so a file that disappears from this machine
   stays in the backup.
 
+  Since 2026-10-11 it also copies two subfolders of the desktop app's own data folder
+  (%APPDATA%\Claude): claude-code-sessions (the session index: titles, archive flags, the map
+  from app session to transcript) and local-agent-mode-sessions (Cowork chat transcripts),
+  into <OneDrive>\Liminality-claude-home-backup-current\app-data\. A reinstall wipes that
+  folder and nothing else backs it up.
+
 .NOTES
   Excluded: cache, shell-snapshots, debug, statsig, session-env (regenerable machine state),
-  sessions (holds per-session key files), __pycache__, and any *.key file anywhere.
+  sessions (holds per-session key files), __pycache__, and any *.key file anywhere. From the
+  app folder also: skills-plugin and rpm (plugin bundles), uploads-tmp, backups, cache files
+  and the .audit-key files.
 #>
 
 $ErrorActionPreference = 'Stop'
@@ -51,8 +59,33 @@ $code = $LASTEXITCODE
 # robocopy: 0 = nothing to do, 1 = files copied, <8 = benign, >=8 = a real failure
 $verdict = if ($code -ge 8) { 'FAILED' } elseif ($code -eq 0) { 'no change' } else { 'copied' }
 Add-Content -Path $log -Encoding utf8 -Value ("  {0,-22} {1} (rc={2})" -f 'claude-home', $verdict, $code)
+$worst = $code
 
-if ($code -ge 8) {
+# Added 2026-10-11: two subfolders of the Claude desktop app's own data folder, which a
+# reinstall wipes and nothing else backs up. claude-code-sessions holds the session index
+# (titles, archive flags, the map from app session to transcript); local-agent-mode-sessions
+# holds the Cowork chat transcripts. Plugin bundles, caches, temp uploads and key files are
+# excluded; the rest is a few megabytes.
+$app = Join-Path $env:APPDATA 'Claude'
+foreach ($job in @(
+    @{ From = (Join-Path $app 'claude-code-sessions');       To = (Join-Path $dest 'app-data\claude-code-sessions');       Name = 'app session index' },
+    @{ From = (Join-Path $app 'local-agent-mode-sessions');  To = (Join-Path $dest 'app-data\local-agent-mode-sessions');  Name = 'app cowork sessions' }
+)) {
+    if (-not (Test-Path $job.From)) {
+        Add-Content -Path $log -Encoding utf8 -Value ("  SKIP {0}: source missing" -f $job.Name)
+        continue
+    }
+    $appArgs = @('/E', '/XO', '/R:1', '/W:1', '/NFL', '/NDL', '/NP', '/NJH', '/FFT', '/DST',
+                 '/XD', 'skills-plugin', 'rpm', 'cache', 'uploads-tmp', '__pycache__', 'backups',
+                 '/XF', '*.key', '.audit-key', '*cache*.json')
+    $null = & robocopy $job.From $job.To @appArgs 2>&1 | Out-String
+    $code = $LASTEXITCODE
+    if ($code -gt $worst) { $worst = $code }
+    $verdict = if ($code -ge 8) { 'FAILED' } elseif ($code -eq 0) { 'no change' } else { 'copied' }
+    Add-Content -Path $log -Encoding utf8 -Value ("  {0,-22} {1} (rc={2})" -f $job.Name, $verdict, $code)
+}
+
+if ($worst -ge 8) {
     Add-Content -Path $log -Encoding utf8 -Value "  RESULT: FAILED"
     exit 1
 }

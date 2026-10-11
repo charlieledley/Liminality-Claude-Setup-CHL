@@ -20,7 +20,7 @@ folders, and secrets. Those belong to their projects or stay on the machine.
 |---|---|---|
 | `home/CLAUDE.md` | global working rules, read in every project | yes |
 | `home/settings.json` | hooks and auto-mode settings | yes |
-| `home/skills/` | personal skills: `bbg-pull`, `checkpoint`, `xlsx-report`, `obsidian-sync`, `implement-change`, `fix-bug`, `adversarial-review` | yes |
+| `home/skills/` | personal skills: `bbg-pull`, `checkpoint`, `xlsx-report`, `obsidian-sync`, `implement-change`, `fix-bug`, `adversarial-review`, `claims` | yes |
 | `home/hooks/` | hook scripts referenced from `settings.json` (compaction reminder, command guard, Python syntax check) | yes |
 | `home/agents/` | subagent definitions: researcher, architect, implementer, test-engineer, reviewer, figure-checker, security-reviewer | yes |
 | `home/docs/` | reference documents Claude reads, such as the agent orchestration guide | yes |

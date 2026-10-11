@@ -49,5 +49,6 @@ must be re-stated with its construction, and any decision file or deck data refr
 ## Report
 
 Root cause with evidence, the fix, the regression test, every figure that changed (old,
-new, construction), the commands run, and what is still unverified. Then `checkpoint`.
-Commit only if asked.
+new, construction), the commands run, and what is still unverified. Every conclusion the bug
+overturned is superseded in the claim store (`claims` skill) with the root cause as the
+reason, and the corrected conclusion recorded. Then `checkpoint`. Commit only if asked.

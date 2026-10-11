@@ -31,6 +31,10 @@ ones that are wrong.
    budget or cap; a proxy or truncation that was never put to Charlie.
 6. **Where it will appear.** On a slide: the figure must come from the deck data JSON, not be
    typed into prose, and the window or limit must be in the body text, not only a footnote.
+7. **Claim store.** If the repo has `docs/claims.jsonl`, run
+   `python ~/.claude/skills/claims/claims.py list --all` from the repo folder. A figure or
+   conclusion that rests on a superseded claim is a P1 finding; say which claim replaced it
+   and why. A new conclusion that is not recorded is a P3 finding.
 
 ## Return
 
