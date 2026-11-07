@@ -41,6 +41,12 @@ the colour.
 **Percent kinds take percent POINTS** (`12.3` -> `12.3%`) and divide by 100 on write,
 so the cell holds a real number Excel can chart and recompute, never a string.
 
+**Column widths.** Data sets the width of a column; a long header wraps over up to six
+lines and the header row grows to fit, so columns stay narrow enough to read on a laptop
+(Charlie, 2026-10-16). A header only widens its column so its longest word is not broken
+and the whole header fits in about four lines. Only the label column may be wide (up to 34)
+on the strength of its header. Do not set `column_dimensions` by hand in a script to undo this.
+
 **Charts.** `Block(..., chart={"kind": "bar", "cats": "Bin", "values": [...]})` draws
 a native Excel chart from the block's own cells - it stays live and editable in the
 workbook rather than being a pasted image.

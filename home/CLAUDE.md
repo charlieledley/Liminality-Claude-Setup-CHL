@@ -107,3 +107,14 @@ repos. The rules above win where they overlap.
   colleague's remote on a standing instruction. (Charlie, 2026-10-09.)
 - Before discarding or overwriting, look at what is there. Office metadata churn on `.xlsx`
   files is not unsaved work.
+
+## Investor decks (every project; Charlie, 2026-10-21)
+
+- Every Liminality deck that goes to investors carries the "Disclosures" page at the front, right after the cover (the
+  page is titled Disclosures, never Disclaimer, so the footnote sentence below matches it): the Disclosures page of Deck 1 (verbatim text in
+  `C:\Liminality-put-writing-strategy\recovered\session-2026-09-21\deck\build_open.py`, section "disclaimer"; headings
+  No offer or solicitation / Eligibility requirements / Not advice / Hypothetical Performance Results). Copy it, do not
+  paraphrase it.
+- Every page that shows hypothetical (backtested, simulated or modelled) performance ends its footnote with, verbatim:
+  "Please see the disclosures page regarding the hypothetical performance results listed above." Build it as one
+  constant appended by the footnote helper so no page can carry a variant.

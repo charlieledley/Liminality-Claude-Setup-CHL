@@ -24,7 +24,7 @@ on write so the cell holds a real Excel percentage, not a string.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
 from openpyxl import Workbook
@@ -147,7 +147,27 @@ def _add_chart(ws, block: Block, header_row: int, first_row: int, last_row: int)
     ws.add_chart(chart, spec.get("anchor") or f"{get_column_letter(len(cols) + 2)}{header_row}")
 
 
-def _write_block(ws, block: Block, row: int, width_acc: Dict[int, float]) -> int:
+def _wrapped_lines(text: str, per_line: float) -> int:
+    """Lines a wrapped header needs when about `per_line` characters fit on one line. Words are
+    kept whole, as Excel does; a word longer than the line takes a line (or more) of its own."""
+    lines, cur = 1, 0.0
+    for word in str(text).split():
+        n = len(word)
+        if cur == 0:
+            cur = n
+        elif cur + 1 + n <= per_line:
+            cur += 1 + n
+        else:
+            lines += 1
+            cur = n
+        while cur > per_line:
+            lines += 1
+            cur -= per_line
+    return lines
+
+
+def _write_block(ws, block: Block, row: int, width_acc: Dict[int, float],
+                 header_rows: Optional[List[Tuple[int, List[str], Optional[int]]]] = None) -> int:
     df = block.df
     ncol = len(df.columns)
     if ncol == 0:
@@ -171,11 +191,22 @@ def _write_block(ws, block: Block, row: int, width_acc: Dict[int, float]) -> int
         cell.alignment = Alignment(horizontal="left" if col == block.label_col else "right",
                                    vertical="center", wrap_text=True)
         cell.border = _BORDER
-        # Headers wrap, so a header longer than its column costs height, not legibility. Only the
-        # label column is allowed to be wide on the strength of its header.
-        width_acc[j] = max(width_acc.get(j, 0),
-                           min(len(str(col)) + 2, 34 if col == block.label_col else 18))
-    ws.row_dimensions[row].height = 28
+        # Headers wrap over several lines, so a long header costs row height, not column width
+        # (Charlie, 2026-10-16: wide columns made the sheets hard to read on a laptop). A header
+        # widens its column only enough that its longest word is not broken and the whole header
+        # fits in about four lines; the data sets the rest. The label column may still be wide on
+        # the strength of its header.
+        if col == block.label_col:
+            width_acc[j] = max(width_acc.get(j, 0), min(len(str(col)) + 2, 34))
+        else:
+            longest = max((len(w) for w in str(col).split()), default=0)
+            four_lines = -(-len(str(col)) // 4) + 2
+            width_acc[j] = max(width_acc.get(j, 0), min(max(longest + 2, four_lines), 18))
+    if header_rows is not None:
+        header_rows.append((row, [str(c) for c in df.columns],
+                            list(df.columns).index(block.label_col) + 1
+                            if block.label_col in list(df.columns) else None))
+    ws.row_dimensions[row].height = 28     # provisional; write_report sets it from the final widths
     row += 1
 
     # --- body ---
@@ -265,12 +296,23 @@ def write_report(path, sheets: Dict[str, List[Block]], title: Optional[str] = No
             row += 1
 
         widths: Dict[int, float] = {}
+        header_rows: List[Tuple[int, List[str], Optional[int]]] = []
         first_top = row
         for block in blocks:
-            row = _write_block(ws, block, row, widths)
+            row = _write_block(ws, block, row, widths, header_rows)
 
-        for j, w in widths.items():
-            ws.column_dimensions[get_column_letter(j)].width = min(max(w, 8), 34)
+        final_w = {j: min(max(w, 8), 34) for j, w in widths.items()}
+        for j, w in final_w.items():
+            ws.column_dimensions[get_column_letter(j)].width = w
+        # Header row height from the lines each header needs at its final column width. Excel's
+        # width unit is about one character of 11pt Calibri; the headers are bold 10pt, so a
+        # column of width w holds about w characters a line. Thirteen points a line, six at most.
+        for hrow, names, _label_j in header_rows:
+            lines = 1
+            for j, name in enumerate(names, start=1):
+                per_line = max(final_w.get(j, 8) - 1.0, 4.0)
+                lines = max(lines, _wrapped_lines(name, per_line))
+            ws.row_dimensions[hrow].height = 6 + 13 * min(lines, 6)
         if freeze and blocks:
             ws.freeze_panes = ws.cell(row=first_top + 2, column=2)
         ws.page_setup.orientation = "landscape"
