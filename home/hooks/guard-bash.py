@@ -24,7 +24,7 @@ import subprocess
 import sys
 
 PERSONAL_GITHUB = "github.com/charlieledley/"
-SCRATCH_MARKERS = ("\\temp\\", "/temp/", "/tmp/", "$env:temp", "$env:tmp", "%temp%", "%tmp%", "scratchpad", "scratch-workspaces", "\\.claude\\worktrees", "/.claude/worktrees")
+SCRATCH_MARKERS = ("\\temp\\", "\\tmp\\", "$env:temp", "$env:tmp", "%temp%", "%tmp%", "scratchpad", "scratch-workspaces", "\\.claude\\worktrees")
 
 
 def main() -> int:
@@ -111,8 +111,8 @@ def remote_url(repo_dir: str, remote: str) -> str:
 def is_scratch(token: str) -> bool:
     t = token.strip("\"'").replace("\\\\", "\\")
     t = os.path.expanduser(t) if t.startswith("~") else t
-    t = os.path.expandvars(t).lower()
-    return any(mk in t for mk in SCRATCH_MARKERS) or t.startswith("$t") or t.startswith("$s") or t.startswith("$tmp")
+    t = os.path.expandvars(t).lower().replace("/", "\\")
+    return any(mk in t for mk in SCRATCH_MARKERS) or t.startswith("$t") or t.startswith("$s")
 
 
 if __name__ == "__main__":

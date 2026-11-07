@@ -41,7 +41,33 @@ from pathlib import Path
 HOME = Path.home()
 APPDATA = Path(os.environ.get("APPDATA", HOME / "AppData" / "Roaming"))
 CLAUDE_HOME = HOME / ".claude"
-APP_DIR = APPDATA / "Claude"
+def winlong(p: Path) -> Path:
+    """Paths under the Store package folder run past Windows' 260-character limit; the \\\\?\\ prefix
+    lets Python open and stat them. Shell tools cope on their own."""
+    s = str(p)
+    if os.name == "nt" and len(s) > 240 and not s.startswith("\\\\?\\"):
+        return Path("\\\\?\\" + s)
+    return p
+
+
+def plain(p) -> str:
+    return str(p).replace("\\\\?\\", "")
+
+
+def find_app_dirs() -> list[Path]:
+    """Every place the Claude desktop app's data can be. Inside the app's own processes it all
+    shows at %APPDATA%\\Claude; from a scheduled task or a plain shell the Store-packaged app's
+    files are split between that path and <LocalAppData>\\Packages\\Claude_*\\LocalCache\\Roaming\\Claude
+    (the app writes one, the Claude Code process the other). Read all of them and merge."""
+    cands = [APPDATA / "Claude"]
+    pkgs = Path(os.environ.get("LOCALAPPDATA", HOME / "AppData" / "Local")) / "Packages"
+    if pkgs.exists():
+        cands += [p / "LocalCache" / "Roaming" / "Claude" for p in sorted(pkgs.glob("Claude_*"))]
+    return [c for c in cands if c.exists()] or cands[:1]
+
+
+APP_DIRS = find_app_dirs()
+APP_DIR = APP_DIRS[0]
 SYNC_VERSION = 5  # bump when the note format changes so --force is implied
 
 ROOT = "Claude"
@@ -192,33 +218,41 @@ def tool_summary(name: str, inp: dict) -> str:
 def load_app_sessions() -> dict[str, dict]:
     """cliSessionId -> app record (Claude Code sessions)."""
     out = {}
-    for f in glob.glob(str(APP_DIR / "claude-code-sessions" / "*" / "*" / "local_*.json")):
-        try:
-            o = json.loads(Path(f).read_text(encoding="utf-8"))
-        except Exception:
-            continue
-        cli = o.get("cliSessionId")
-        if cli:
-            out[cli] = o
+    for app_dir in APP_DIRS:
+        for f in glob.glob(str(app_dir / "claude-code-sessions" / "*" / "*" / "local_*.json")):
+            try:
+                o = json.loads(Path(f).read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            cli = o.get("cliSessionId")
+            if cli and cli not in out:
+                out[cli] = o
     return out
 
 
 def load_cowork_sessions() -> list[tuple[dict, Path]]:
-    """(app record, transcript path) for each Cowork session that has a transcript."""
+    """(app record, transcript path) for each Cowork session that has a transcript. The record
+    and the transcript may sit in different physical app folders; look for the transcript in all."""
     out = []
-    for f in glob.glob(str(APP_DIR / "local-agent-mode-sessions" / "*" / "*" / "local_*.json")):
-        try:
-            o = json.loads(Path(f).read_text(encoding="utf-8"))
-        except Exception:
-            continue
-        sid = o.get("sessionId", "")
-        id8 = sid.replace("local_", "")[:8]
-        cli = o.get("cliSessionId")
-        if not cli:
-            continue
-        t = Path(f).parent / id8 / ".claude" / "projects" / "session" / f"{cli}.jsonl"
-        if t.exists():
-            out.append((o, t))
+    seen = set()
+    for app_dir in APP_DIRS:
+        for f in glob.glob(str(app_dir / "local-agent-mode-sessions" / "*" / "*" / "local_*.json")):
+            try:
+                o = json.loads(Path(f).read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            sid = o.get("sessionId", "")
+            cli = o.get("cliSessionId")
+            if not cli or sid in seen:
+                continue
+            id8 = sid.replace("local_", "")[:8]
+            rel = Path(f).parent.relative_to(app_dir) / id8 / ".claude" / "projects" / "session" / f"{cli}.jsonl"
+            for d in APP_DIRS:
+                cand = winlong(d / rel)
+                if cand.exists():
+                    out.append((o, cand))
+                    seen.add(sid)
+                    break
     return out
 
 
@@ -385,7 +419,7 @@ class Session:
             "cost": round(self.cost.get("totalCostUSD", 0) or 0, 2), "archived": bool(self.app.get("isArchived")),
             "app_link": self.app_link, "root_uuid": self.root_uuid, "cwd": self.cwd,
             "files": sorted(self.files_touched, key=lambda k: -self.files_touched[k])[:40],
-            "artifacts": self.artifacts, "models": sorted(self.models), "source": str(self.path),
+            "artifacts": self.artifacts, "models": sorted(self.models), "source": plain(self.path),
         }
 
     # -- render
@@ -410,7 +444,7 @@ class Session:
             f"app_session_id: {yaml_str(self.app.get('sessionId', ''))}",
             f"archived: {str(s['archived']).lower()}",
             f"cwd: {yaml_str(self.cwd)}",
-            f"source: {yaml_str(self.path)}",
+            f"source: {yaml_str(plain(self.path))}",
             f"last_synced: {yaml_str(fmt_dt(dt.datetime.now().astimezone()))}",
             "tags: [" + ", ".join(tags) + "]",
             "---",
@@ -419,7 +453,7 @@ class Session:
         meta = [f"Project: [[{safe_name(self.project)}]]  ·  {self.date}  ·  {s['prompts']} prompts, {s['tool_calls']} tool calls"]
         if self.app_link:
             meta.append(f"[Open in Claude app]({self.app_link})")
-        meta.append(f"[Transcript on disk]({file_url(self.path)})")
+        meta.append(f"[Transcript on disk]({file_url(plain(self.path))})")
         head.append("  ·  ".join(meta))
         if s["cost"]:
             head.append(f"\nAPI cost recorded by the app: USD {s['cost']:.2f} (from the transcript's cost-state line; the app's own figure, not audited).")
@@ -753,6 +787,8 @@ python "{script}"
 
 Add `--force` to rebuild every note (needed after the script's note format changes). Unchanged transcripts are skipped by comparing size and modification time, recorded in `Claude/.sync-state.json`.
 
+It also runs by itself: when a Claude Code session closes (a hook), and every hour from the Windows scheduled task "Liminality Obsidian vault sync" (added 2026-10-11, registered by the setup repo's `tools/register-backup-tasks.ps1`), which logs beside the backup logs on OneDrive.
+
 To import a claude.ai export:
 
 ```
@@ -798,7 +834,7 @@ def main() -> None:
     changed = 0
     for path, kind, rec in sources:
         st = path.stat()
-        key = str(path)
+        key = plain(path)
         sig = {"mtime": st.st_mtime, "size": st.st_size, "title": (rec or {}).get("title"), "archived": (rec or {}).get("isArchived")}
         old = cache.get(key)
         note_dir = vault / (CC_DIR if kind == "claude-code" else COWORK_DIR) / "Sessions"

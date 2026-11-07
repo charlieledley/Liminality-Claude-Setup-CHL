@@ -27,7 +27,9 @@ folders, and secrets. Those belong to their projects or stay on the machine.
 | `tools/sync_setup.py` | copies between `~/.claude` and `home/` | yes |
 | `tools/backup-to-onedrive.ps1` | hourly copy of this repo to company OneDrive | yes |
 | `tools/backup-claude-home-to-onedrive.ps1` | hourly copy of the whole live `~/.claude` to OneDrive | yes |
-| `tools/register-backup-tasks.ps1` | recreates every backup task on a rebuilt machine | yes |
+| `tools/sync-obsidian-vault.ps1` | hourly refresh of the Obsidian vault from this PC's sessions, memory and setup | yes |
+| `tools/register-backup-tasks.ps1` | recreates every scheduled task (four backups, the vault sync) on a rebuilt machine | yes |
+| `tests/test_guard_bash.py` | pins what the command-guard hook blocks and allows; `python tests/test_guard_bash.py` | yes |
 | `docs/setup-notes-<date>.md` | the setup that is not files: app settings, connectors, tasks | yes |
 | `docs/decisions/` | numbered decision log | yes |
 

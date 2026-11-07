@@ -66,11 +66,20 @@ $worst = $code
 # (titles, archive flags, the map from app session to transcript); local-agent-mode-sessions
 # holds the Cowork chat transcripts. Plugin bundles, caches, temp uploads and key files are
 # excluded; the rest is a few megabytes.
-$app = Join-Path $env:APPDATA 'Claude'
-foreach ($job in @(
-    @{ From = (Join-Path $app 'claude-code-sessions');       To = (Join-Path $dest 'app-data\claude-code-sessions');       Name = 'app session index' },
-    @{ From = (Join-Path $app 'local-agent-mode-sessions');  To = (Join-Path $dest 'app-data\local-agent-mode-sessions');  Name = 'app cowork sessions' }
-)) {
+# Inside the app's own processes everything shows at %APPDATA%\Claude. From a scheduled task the
+# Store-packaged app's files are split between that path and
+# <LocalAppData>\Packages\Claude_*\LocalCache\Roaming\Claude (the app writes one, the Claude Code
+# process the other), so both roots are copied into the same destination; copy-only merges them.
+$appRoots = @((Join-Path $env:APPDATA 'Claude'))
+Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Packages') -Directory -Filter 'Claude_*' -ErrorAction SilentlyContinue |
+    ForEach-Object { $appRoots += (Join-Path $_.FullName 'LocalCache\Roaming\Claude') }
+$jobs = @()
+foreach ($root in $appRoots) {
+    $tag = if ($root -like '*LocalCache*') { ' (package)' } else { '' }
+    $jobs += @{ From = (Join-Path $root 'claude-code-sessions');      To = (Join-Path $dest 'app-data\claude-code-sessions');      Name = "app session index$tag" }
+    $jobs += @{ From = (Join-Path $root 'local-agent-mode-sessions'); To = (Join-Path $dest 'app-data\local-agent-mode-sessions'); Name = "app cowork sessions$tag" }
+}
+foreach ($job in $jobs) {
     if (-not (Test-Path $job.From)) {
         Add-Content -Path $log -Encoding utf8 -Value ("  SKIP {0}: source missing" -f $job.Name)
         continue

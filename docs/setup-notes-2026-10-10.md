@@ -38,7 +38,12 @@ The claude-home task now also copies two subfolders of the desktop app's own dat
 `claude-code-sessions` (the session index: titles, archive flags, the map from app session to
 transcript file) and `local-agent-mode-sessions` (Cowork chat transcripts), minus plugin
 bundles, caches and key files. The app folder is wiped by a reinstall (2026-09-22) and was
-covered by nothing before. Same task, same script, no change to `register-backup-tasks.ps1`.
+covered by nothing before. Same task, same script.
+
+A fifth scheduled task, "Liminality Obsidian vault sync", runs `tools/sync-obsidian-vault.ps1`
+hourly (registered 2026-10-11) so the vault stays current while sessions sit open; the
+SessionEnd hook only fires when a session closes. It logs to `obsidian-sync.log` beside the
+claude-home backup log. `register-backup-tasks.ps1` knows all five.
 Obsidian is installed on this PC (2026-10-10); its vault is in company OneDrive, so OneDrive
 mirrors it, and every note under `Claude/` regenerates from the transcripts.
 
@@ -58,3 +63,30 @@ memory folders, agents, skills, reference docs and the global rules into `Claude
 vault, as linked notes. Runs at session end through the hook, or on `/obsidian-sync`.
 claude.ai web chats are not on the PC; they arrive through the account's data export, which
 the skill's importer reads.
+
+## Scheduled tasks in the desktop app (change on 2026-10-15)
+
+The app's own scheduler (the "Scheduled" section of the sidebar) keeps one registry per
+account, org and mode: `%APPDATA%\Claude\local-agent-mode-sessions\<acct>\<org>\scheduled-tasks.json`
+for tasks created in a Cowork chat, whose prompts live under `C:\Users\charlie\Claude\Scheduled\`,
+and `%APPDATA%\Claude\claude-code-sessions\<acct>\<org>\scheduled-tasks.json` for tasks created
+from a Claude Code session, whose prompts live under `~/.claude/scheduled-tasks/<id>/SKILL.md`.
+A run is a new session of the same mode; a Claude Code task runs in the working folder of the
+session that created it (the registry's `cwd`), so tasks are created from a session opened in
+the folder they should run in. Runs happen only while the app is open. The scheduled-tasks
+tools in a session see only that mode's registry.
+
+Cowork cannot run its Linux sandbox on this PC: the machine is a VMware virtual machine
+without nested virtualization (the app reports "Claude's workspace requires hardware
+virtualization"), so Cowork sessions have no shell or file tools, though browsers, search and
+connectors work. Enabling it is a per-VM option on the VMware host, not a BIOS setting here.
+
+The two daily digests (Daily Tab Digest 06:00, Daily Candidate Watch 07:00) were created in
+Cowork on 2026-10-12 and never fired. On 2026-10-15 they were recreated as Claude Code tasks
+from a session in `C:\Liminality-digests`, which holds the prompt sources (`prompts/`), a
+README and the daily output files. Both prompts now use Claude in Chrome only, the Bash tool
+with Python for the email transform, and a catch-up window that runs from the previous
+edition's date. The Cowork copies were still enabled in the Cowork registry at the time of
+writing and are disabled from the Scheduled sidebar; nothing here can remove them. Further
+tasks (topic watch, schedule summary, inbox triage) were added to the same folder the same
+day from that session.
