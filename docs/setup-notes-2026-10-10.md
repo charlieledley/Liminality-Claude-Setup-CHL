@@ -44,6 +44,12 @@ A fifth scheduled task, "Liminality Obsidian vault sync", runs `tools/sync-obsid
 hourly (registered 2026-10-11) so the vault stays current while sessions sit open; the
 SessionEnd hook only fires when a session closes. It logs to `obsidian-sync.log` beside the
 claude-home backup log. `register-backup-tasks.ps1` knows all five.
+
+Since 2026-11-06 the same hourly task also runs `tools/sync_setup.py to-repo`, so `home/` always
+mirrors the live `~/.claude` (it never commits), and logs how many paths the repo has
+uncommitted. A SessionStart hook, `hooks/setup-repo-drift.sh`, prints that count into every new
+session so the drift is noticed. Reason: three weeks of live skill and rule edits sat unmirrored
+and uncommitted in October because no session ran the mirror step.
 Obsidian is installed on this PC (2026-10-10); its vault is in company OneDrive, so OneDrive
 mirrors it, and every note under `Claude/` regenerates from the transcripts.
 

@@ -21,13 +21,13 @@ folders, and secrets. Those belong to their projects or stay on the machine.
 | `home/CLAUDE.md` | global working rules, read in every project | yes |
 | `home/settings.json` | hooks and auto-mode settings | yes |
 | `home/skills/` | personal skills: `bbg-pull`, `checkpoint`, `xlsx-report`, `obsidian-sync`, `implement-change`, `fix-bug`, `adversarial-review`, `claims`, `liminality-brand` | yes |
-| `home/hooks/` | hook scripts referenced from `settings.json` (compaction reminder, command guard, Python syntax check) | yes |
+| `home/hooks/` | hook scripts referenced from `settings.json` (compaction reminder, setup-repo drift notice, command guard, Python syntax check) | yes |
 | `home/agents/` | subagent definitions: researcher, architect, implementer, test-engineer, reviewer, figure-checker, security-reviewer | yes |
 | `home/docs/` | reference documents Claude reads, such as the agent orchestration guide | yes |
 | `tools/sync_setup.py` | copies between `~/.claude` and `home/` | yes |
 | `tools/backup-to-onedrive.ps1` | hourly copy of this repo to company OneDrive | yes |
 | `tools/backup-claude-home-to-onedrive.ps1` | hourly copy of the whole live `~/.claude` to OneDrive | yes |
-| `tools/sync-obsidian-vault.ps1` | hourly refresh of the Obsidian vault from this PC's sessions, memory and setup | yes |
+| `tools/sync-obsidian-vault.ps1` | hourly refresh of the Obsidian vault; also mirrors `~/.claude` into `home/` and logs uncommitted drift | yes |
 | `tools/register-backup-tasks.ps1` | recreates every scheduled task (four backups, the vault sync) on a rebuilt machine | yes |
 | `tests/test_guard_bash.py` | pins what the command-guard hook blocks and allows; `python tests/test_guard_bash.py` | yes |
 | `docs/setup-notes-<date>.md` | the setup that is not files: app settings, connectors, tasks | yes |

@@ -11,6 +11,17 @@
             "statusMessage": "Post-compaction reminder"
           }
         ]
+      },
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/hooks/setup-repo-drift.sh\"",
+            "timeout": 10,
+            "statusMessage": "Checking the setup repo for uncommitted changes"
+          }
+        ]
       }
     ],
     "PreToolUse": [

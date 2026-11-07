@@ -38,4 +38,20 @@ $line = ($out -split "`r?`n" | Where-Object { $_ -match '^Synced ' } | Select-Ob
 if (-not $line) { $line = ($out.Trim() -split "`r?`n" | Select-Object -Last 1) }
 $verdict = if ($code -eq 0) { 'ok' } else { "FAILED (rc=$code)" }
 Add-Content -Path $log -Encoding utf8 -Value ("{0}  {1}  {2}" -f $stamp, $verdict, $line)
+
+# Added 2026-11-06: keep the setup repo's mirror of ~/.claude current and say when the repo has
+# drifted from GitHub. Three weeks of live skill and rule edits once sat unmirrored and
+# uncommitted because no session ran the mirror step. This copies live -> home/ (never commits)
+# and logs how many paths the repo has uncommitted, so the hourly repo backup carries the latest
+# skills and the next session's start-up hook can report the drift.
+$repo = 'C:\Liminality-Claude-Setup-CHL'
+$syncTool = Join-Path $repo 'tools\sync_setup.py'
+if (Test-Path $syncTool) {
+    $mirror = & python $syncTool to-repo 2>&1 | Out-String
+    $copied = ($mirror -split "`r?`n" | Where-Object { $_ -match '^\s+(copied|removed)\s' }).Count
+    $dirty = (& git -C $repo status --porcelain 2>$null | Measure-Object -Line).Lines
+    $msg = if ($copied -gt 0) { "mirrored $copied changed file(s) from ~/.claude into home/" } else { "mirror already current" }
+    $msg += if ($dirty -gt 0) { "; setup repo has $dirty uncommitted path(s), commit when convenient" } else { "; setup repo clean" }
+    Add-Content -Path $log -Encoding utf8 -Value ("{0}  setup-repo  {1}" -f $stamp, $msg)
+}
 exit $code
